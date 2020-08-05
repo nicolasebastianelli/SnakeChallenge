@@ -112,6 +112,7 @@ class SnakeGraph:
 
         self.__node_number = edge_length ** 2
         self.__adjacent_node = self.__compute_adjacent_nodes(edge_length)
+        self.__adjacent_lowest_degree_ordering()
         self.__found_paths = 0
 
     def __compute_adjacent_nodes(self, edge_length):
@@ -137,25 +138,36 @@ class SnakeGraph:
 
         return nodes
 
+    def __highest_degree_ordering(self):
+        number_of_neighbour = [len(self.__adjacent_node[i]) for i in range(self.__node_number)]
+        return [x for _, x in sorted(zip(number_of_neighbour, range(self.__node_number)), reverse=True)]
+
+    def __adjacent_lowest_degree_ordering(self):
+        for i in range(self.__node_number):
+            number_of_neighbour = [len(self.__adjacent_node[j]) for j in self.__adjacent_node[i]]
+            self.__adjacent_node[i] = ([x for _, x in sorted(zip(number_of_neighbour, self.__adjacent_node[i]))])
+
     def find_all_hamiltonian_paths(self):
         self.__found_paths = 0
-        for i in range(self.__node_number):
+
+        # Starts from the highest degree vertex
+        for i in self.__highest_degree_ordering():
             visited = [False] * self.__node_number
-            visited[i] = True
             self.__find_hamiltonian_paths(i, visited, [i])
 
+    # Depth-First Search
     def __find_hamiltonian_paths(self, start, visited, path):
 
         if len(path) == self.__node_number:
             self.__found_paths += 1
             return
 
-        for adj in self.__adjacent_node[start]:
+        visited[start] = True
 
+        for adj in self.__adjacent_node[start]:
             if not visited[adj]:
-                visited[adj] = True
                 self.__find_hamiltonian_paths(adj, visited, path+[adj])
-                visited[adj] = False
+                visited[adj] = False    # Backtracking
 
     def get_number_of_possible_path(self):
         return self.__found_paths

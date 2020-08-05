@@ -119,29 +119,34 @@ class SnakeGraph:
         nodes = [[] for _ in range(self.__node_number)]
         for i in range(self.__node_number):
 
-            # Node not in first row
+            # Node is not in first row
             if i >= edge_length:
                 nodes[i].append(i - edge_length)
 
-            # Node not in last row
+            # Node is not in last row
             if i+edge_length < self.__node_number:
                 nodes[i].append(i + edge_length)
 
-            # Node not in first column
+            # Node is not in first column
             if (i % edge_length) != 0:
                 nodes[i].append(i - 1)
 
-            # Node not in last column
+            # Node is not in last column
             if ((i+1) % edge_length) != 0:
                 nodes[i].append(i + 1)
 
         return nodes
 
-    def find_all_hamiltonian_paths(self):
-        self.__found_paths = 0
-        for i in range(self.__node_number):
-            visited = [False] * self.__node_number
-            self.__find_hamiltonian_paths(i, visited, [i])
+    def __get_graph_central_node(self):
+        if self.__node_number % 2 == 0:
+            return None
+        return int(self.__node_number/2)
+
+    def __get_representative_subgraph_nodes(self):
+        edge_length = int(self.__node_number**(1/2.))
+        i = int(edge_length / 2)
+        j = int(round(edge_length/2.+0.1))
+        return [jj+ii*edge_length for ii in range(i) for jj in range(j)]
 
     def __find_hamiltonian_paths(self, start, visited, path):
 
@@ -154,6 +159,21 @@ class SnakeGraph:
             if not visited[adj]:
                 self.__find_hamiltonian_paths(adj, visited, path+[adj])
                 visited[adj] = False
+
+    def find_all_hamiltonian_paths(self):
+        self.__found_paths = 0
+
+        # Compute Hamiltonian Paths starting from representative sub-nodes of the graph
+        for i in self.__get_representative_subgraph_nodes():
+            visited = [False] * self.__node_number
+            self.__find_hamiltonian_paths(i, visited, [i])
+        self.__found_paths *= 4
+
+        # Compute Hamiltonian Paths starting from central node of the graph
+        i = self.__get_graph_central_node()
+        if i is not None:
+            visited = [False] * self.__node_number
+            self.__find_hamiltonian_paths(i, visited, [i])
 
     def get_number_of_possible_path(self):
         return self.__found_paths
