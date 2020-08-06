@@ -156,6 +156,10 @@ class SnakeGraph:
     # it recursively find all the Hamiltonian Paths
     def __find_hamiltonian_paths(self, start, visited):
 
+        # Stopping criteria if some nodes are unreachable
+        if not self.__all_nodes_are_reachable(start, visited):
+            return
+
         visited[start] = True
 
         if all(visited):
@@ -166,6 +170,24 @@ class SnakeGraph:
             if not visited[adj]:
                 self.__find_hamiltonian_paths(adj, visited)
                 visited[adj] = False  # Backtracking
+
+    # [Flood-Fill Algorithm] To check if all nodes are still reachable
+    def __all_nodes_are_reachable(self, start, visited):
+        if visited.count(True) < 5:  # At least 5 true are required to create an island
+            return True
+        flooded_visited = visited[:]
+        self.__flood_graph(start, flooded_visited)
+        if all(flooded_visited):
+            return True
+        else:
+            return False
+
+    # [Depth - First Search]
+    def __flood_graph(self, start, flooded_visited):
+        flooded_visited[start] = True
+        for adj in self.__adjacent_node[start]:
+            if not flooded_visited[adj]:
+                self.__flood_graph(adj, flooded_visited)
 
     def find_all_hamiltonian_paths(self):
         self.__found_paths = 0
@@ -194,12 +216,14 @@ def path_count(edge_length):
 
 
 """
-edge_length=1     time: 5.793e-05 seconds    solution: 1
-edge_length=2     time: 7.486e-05 seconds    solution: 8
-edge_length=3     time: 1.771e-04 seconds    solution: 40
-edge_length=4     time: 7.328e-03 seconds    solution: 552
-edge_length=5     time: 0.4066307 seconds    solution: 8648
-edge_length=6     time: 110.82424 seconds    solution: 458696
+Test run on: MacBook Pro - Core i5 2,3 GHz - Ram 8 GB 2133 MHz
+
+edge_length=1     time: 5.912e-05 seconds    solution: 1
+edge_length=2     time: 7.581e-05 seconds    solution: 8
+edge_length=3     time: 3.850e-04 seconds    solution: 40
+edge_length=4     time: 7.284e-03 seconds    solution: 552
+edge_length=5     time: 0.3646438 seconds    solution: 8648
+edge_length=6     time: 24.621315 seconds    solution: 458696
 """
 
 if __name__ == '__main__':
